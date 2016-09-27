@@ -131,7 +131,10 @@ import Unsafe.Coerce
 --
 -- Created either by using the 'makeClass' TH splice for regular classes, or using 'createClass' to create
 -- dynamic classes.
-newtype ReactClass ps = ReactClass JSVal
+newtype ReactClass ps = ReactClass { fromReactClass :: JSVal }
+  deriving (ToJSVal, PToJSVal)
+
+instance IsJSVal (ReactClass ps)
 
 -- |Some value which qualifies as a React node.
 --
@@ -141,15 +144,9 @@ newtype ReactClass ps = ReactClass JSVal
 --    * React element, as created by 'createElement' or 'runFactory' or one of the 'React.DOM' factories
 --    * Array of same
 newtype ReactNode = ReactNode { fromReactNode :: JSVal }
+  deriving (ToJSVal, PToJSVal, FromJSVal)
 
-instance PToJSVal ReactNode where
-  pToJSVal = fromReactNode
-
-instance ToJSVal ReactNode where
-  toJSVal = return . fromReactNode
-
-instance FromJSVal ReactNode where
-  fromJSVal = return . Just . ReactNode
+instance IsJSVal ReactNode
 
 instance IsString ReactNode where
   fromString = ReactNode . pToJSVal . JSString.pack
@@ -174,7 +171,7 @@ instanceElement = unsafeCastGObject . GObject . fromReactInstance
 
 
 -- |A property which accepts values of type @v@
-newtype PropName v = PropName JSString
+newtype PropName v = PropName { fromPropName :: JSString }
 
 -- |A callback function for handling events. Can wrap either a Haskell callback or a raw JS one.
 --
@@ -228,7 +225,7 @@ callback f = RendererM $ do
 data Prop = Prop {-# UNPACK #-} !JSString {-# UNPACK #-} !JSVal
 
 -- |A props object with a phantom type to distinguish props for different components.
-newtype ReactProps ps = ReactProps Object.Object
+newtype ReactProps ps = ReactProps { fromReactProps :: Object.Object }
               deriving (IsJSVal)
 
 instance ToJSVal (ReactProps ps) where
@@ -280,7 +277,7 @@ children (ReactProps o) =
 
 
 -- |Phantom typed wrapper around 'JSArray' used to represent @children@ arrays.
-newtype Array a = Array JSArray
+newtype Array a = Array { fromArray :: JSArray }
                 deriving (IsJSVal)
 
 instance PToJSVal (Array a) where
@@ -332,6 +329,8 @@ createElement' t ps ma = js_createElement (coerce t) ps $ case ma of
 --
 -- @ps@ is the type of the component's properties.
 newtype Factory ps = Factory { factoryVal :: JSVal }
+
+instance IsJSVal (Factory ps)
 
 -- |Apply some props and children to a 'Factory' to produce a React component in the form of a 'ReactNode'.
 --
@@ -423,7 +422,7 @@ getProperties = getProps >>= liftIO . readProperties . coerce
 foreign import javascript unsafe "$1['state']" js_getState :: This ps st -> IO (ReactState st)
 
 -- |A state object with a phantom type to distinguish state values for different components.
-newtype ReactState st = ReactState Object.Object
+newtype ReactState st = ReactState { fromReactState :: Object.Object }
               deriving (IsJSVal)
 
 instance ToJSVal (ReactState st) where
@@ -502,7 +501,7 @@ instance FromJSVal OnlyAttributes where
 
 -- |Type of actions during component rendering and other lifecycle callbacks which can read the current
 -- component instance.
-newtype ReactM ps st a = ReactM {fromReactM :: ReaderT (This ps st) IO a }
+newtype ReactM ps st a = ReactM { fromReactM :: ReaderT (This ps st) IO a }
   deriving (Functor, Applicative, Monad, MonadIO)
 
 -- |Run a 'ReactM' for some component instance.
@@ -526,7 +525,7 @@ instance MonadReader (This ps st) (ReactM ps st) where
 --
 -- See the 'makeClass' splice and 'createClass' functions for the two usual ways classes are created and
 -- callback allocations handled.
-newtype RendererM a = RendererM {fromRendererM :: StateT (IO ()) IO a }
+newtype RendererM a = RendererM { fromRendererM :: StateT (IO ()) IO a }
   deriving (Functor, Applicative, Monad)
 
 -- |A React component specification for a component with props type @ps@ and state type @st@, used as input to
@@ -599,7 +598,9 @@ data SpecMaintenance = SpecMaintenance { specMaintenanceFinalize :: IO () }
 
 -- |A specification of a 'ReactClass' which has been prepared with 'buildSpec' for use with 'createClass' by
 -- binding all the callback functions.
-newtype ReactSpec ps st = ReactSpec Object.Object -- [object Object], haha
+newtype ReactSpec ps st = ReactSpec { fromReactSpec :: Object.Object } -- [object Object], haha
+
+instance IsJSVal (ReactSpec ps st)
 
 -- |Set a property of a JS object if 'Just', do nothing otherwise.
 maybeSetProp :: JSString -> Maybe JSVal -> Object.Object -> IO ()
@@ -1030,18 +1031,22 @@ class ErrorEvent e where {}
 -}
 
 -- |Event data given when the clipboard event handlers are called: 'onCopy', 'onCut', and 'onPaste'.
-newtype ClipboardEvent = ClipboardEvent Object.Object
+newtype ClipboardEvent = ClipboardEvent { fromClipboardEvent :: Object.Object }
 -- clipboardData :: ClipboardEvent -> m DataTransfer
+
+instance IsJSVal ClipboardEvent
 
 -- |Event data given for composition events: 'onCmopositionStart', 'onCompositionUpdate', and
 -- 'onCompositionEnd'.
-newtype CompositionEvent = CompositionEvent Object.Object
+newtype CompositionEvent = CompositionEvent { fromCompositionEvent :: Object.Object }
+instance IsJSVal CompositionEvent
 instance SyntheticEvent CompositionEvent where
   type NativeEvent CompositionEvent = JSVal
 -- data_ :: e -> m JSString
 
 -- |Event data given for the keyboard events: 'onKeyDown', 'onKeyPress', and 'onKeyUp'.
-newtype KeyboardEvent = KeyboardEvent Object.Object
+newtype KeyboardEvent = KeyboardEvent { fromKeyboardEvent :: Object.Object }
+instance IsJSVal KeyboardEvent
 instance SyntheticEvent KeyboardEvent where
   type NativeEvent KeyboardEvent = Keyboard.KeyboardEvent
 {-
@@ -1060,18 +1065,21 @@ which :: e -> m Int
 -}
 
 -- |Event data given for the focus change events: 'onFocus' and 'onBlur'.
-newtype FocusEvent = FocusEvent Object.Object
+newtype FocusEvent = FocusEvent { fromFocusEvent :: Object.Object }
+instance IsJSVal FocusEvent
 instance SyntheticEvent FocusEvent where
   type NativeEvent FocusEvent = Focus.FocusEvent
 -- relatedTarget :: e -> m EventTarget
 
 -- |Event data given for form control events: 'onChange', 'onInput', and 'onSubmit'.
-newtype FormEvent = FormEvent Object.Object
+newtype FormEvent = FormEvent { fromFormEvent :: Object.Object }
+instance IsJSVal FormEvent
 instance SyntheticEvent FormEvent where
   type NativeEvent FormEvent = JSVal
 
 -- |Event data given for mouse related events: 'onClick', 'onMouseDown', 'onMouseUp', etc.
-newtype MouseEvent = MouseEvent Object.Object
+newtype MouseEvent = MouseEvent { fromMouseEvent :: Object.Object }
+instance IsJSVal MouseEvent
 instance SyntheticEvent MouseEvent where
   type NativeEvent MouseEvent = Mouse.MouseEvent
 {-
@@ -1092,45 +1100,53 @@ screenY :: e -> m Int
 -}
 
 -- |Event data given when the 'onSelect' event handler is called.
-newtype SelectionEvent = SelectionEvent Object.Object
+newtype SelectionEvent = SelectionEvent { fromSelectionEvent :: Object.Object }
+instance IsJSVal SelectionEvent
 instance SyntheticEvent SelectionEvent where
   type NativeEvent SelectionEvent = JSVal
 
 -- |Event data given with touchscreen events: 'onTouchStart', 'onTouchEnd', etc.
-newtype TouchEvent = TouchEvent Object.Object
+newtype TouchEvent = TouchEvent { fromTouchEvent :: Object.Object }
+instance IsJSVal TouchEvent
 instance SyntheticEvent TouchEvent where
   type NativeEvent TouchEvent = Touch.TouchEvent
 -- altKey
 -- changedTouches :: e -> m (Maybe TouchList)
 
 -- |Event data given when the 'onScroll' event handler is called.
-newtype UIEvent = UIEvent Object.Object
+newtype UIEvent = UIEvent { fromUIEvent :: Object.Object }
+instance IsJSVal UIEvent
 instance SyntheticEvent UIEvent where
   type NativeEvent UIEvent = JSVal
 
 -- |Event data given when the 'onWheel' handler is called.
-newtype WheelEvent = WheelEvent Object.Object
+newtype WheelEvent = WheelEvent { fromWheelEvent :: Object.Object }
+instance IsJSVal WheelEvent
 instance SyntheticEvent WheelEvent where
   type NativeEvent WheelEvent = JSVal
 
 -- |Event data associated with media playback events: 'onPlay', 'onPause', 'onPlaying', etc.
-newtype MediaEvent = MediaEvent Object.Object
+newtype MediaEvent = MediaEvent { fromMediaEvent :: Object.Object }
+instance IsJSVal MediaEvent
 instance SyntheticEvent MediaEvent where
   type NativeEvent MediaEvent = JSVal
 
 -- |Event data given when the 'onLoad' event handler is called due to an image load completing.
-newtype ImageEvent = ImageEvent Object.Object
+newtype ImageEvent = ImageEvent { fromImageEvent :: Object.Object }
+instance IsJSVal ImageEvent
 instance SyntheticEvent ImageEvent where
   type NativeEvent ImageEvent = JSVal
 
 -- |Event data given for the animation related events: 'onAnimationStart', 'onAnimationIteration', and
 -- 'onAnimationEnd'.
-newtype AnimationEvent = AnimationEvent Object.Object
+newtype AnimationEvent = AnimationEvent { fromAnimationEvent :: Object.Object }
+instance IsJSVal AnimationEvent
 instance SyntheticEvent AnimationEvent where
   type NativeEvent AnimationEvent = Animation.AnimationEvent
 
 -- |Event data given when a transition ends and the 'onTransitionEnd' handler is called.
-newtype TransitionEvent = TransitionEvent Object.Object
+newtype TransitionEvent = TransitionEvent { fromTransitionEvent :: Object.Object }
+instance IsJSVal TransitionEvent
 instance SyntheticEvent TransitionEvent where
   type NativeEvent TransitionEvent = Transition.TransitionEvent
 
@@ -1149,6 +1165,8 @@ noProps = []
 
 -- |A handle to the current React component
 newtype This ps st = This { fromThis :: JSVal }
+
+instance IsJSVal (This ps st)
 
 foreign import javascript unsafe "$1['refs'][$2]" js_getRef :: This ps st -> JSString -> JSVal
 
