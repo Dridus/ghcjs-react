@@ -34,9 +34,11 @@ flag addons
 
 library
   default-language:    Haskell2010
+  ghc-options:         -Wall -Werror
   exposed-modules:     React,
                        React.DOM,
-                       React.DOM.Utils
+                       React.DOM.Utils,
+                       React.Primitive
   if flag(addons)
      exposed-modules:  React.Addons
   -- other-modules:       

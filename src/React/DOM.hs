@@ -6,29 +6,29 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE FunctionalDependencies #-}
 module React.DOM where
-import qualified Data.Foldable as F
 import Data.Proxy
 import qualified Data.JSString as JSString
 import JavaScript.Object (Object)
 import GHCJS.Foreign
 import GHCJS.Marshal.Pure
 import GHCJS.Types
-import React
+import React.Primitive
 
-foreign import javascript "React['DOM'][$1].apply(this, [$2].concat($3))" js_elem :: JSString -> ReactProps ps -> JSVal -> ReactNode
-mkElem :: (Applicative t, Foldable t, F.Foldable elems) => JSString -> t Prop -> elems ReactNode -> ReactNode
-mkElem str ps c = js_elem str (buildProps ps) (if Prelude.null c then jsNull else pToJSVal $ array $ F.toList c)
+foreign import javascript "React['DOM'][$1].apply(this, [$2].concat($3))" js_elem :: JSString -> Props ps -> JSVal -> Node
 
-mkEmptyElem :: (Applicative t, Foldable t) => JSString -> t Prop -> ReactNode
-mkEmptyElem str ps = js_elem str (buildProps ps) jsUndefined
+mkElem :: (ToProps props, ToChildren children) => JSString -> props -> children -> Node
+mkElem str ps = js_elem str (toProps ps) . asChildrenJSVal
+
+mkEmptyElem :: ToProps props => JSString -> props -> Node
+mkEmptyElem str ps = js_elem str (toProps ps) jsUndefined
 
 class ElementOrProp f t where
   symbolName :: JSString -> (f, Proxy t)
 
-instance (Applicative t, Foldable t, Foldable elems) => ElementOrProp (t Prop -> elems ReactNode -> ReactNode) a where
+instance (ToProps props, ToChildren children) => ElementOrProp (props -> children -> Node) a where
   symbolName n = (mkElem n, Proxy)
 
-instance (Applicative t, Foldable t) => ElementOrProp (t Prop -> ReactNode) a where
+instance ToProps props => ElementOrProp (props -> Node) a where
   symbolName n = (mkEmptyElem n, Proxy)
 
 instance ElementOrProp (PropName t) t where
@@ -45,367 +45,367 @@ instance IsProp (PropName t) t where
 instance PToJSVal t => IsProp (t -> Prop) t where
   mkProp str = (.:) (PropName str :: PropName t)
 
-a_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+a_ :: (ToProps props, ToChildren children) => props -> children -> Node
 a_ = mkElem "a"
 
-abbr_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+abbr_ :: (ToProps props, ToChildren children) => props -> children -> Node
 abbr_ = mkElem "abbr"
 
-address_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+address_ :: (ToProps props, ToChildren children) => props -> children -> Node
 address_ = mkElem "address"
 
-area_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+area_ :: ToProps props => props -> Node
 area_ = mkEmptyElem "area"
 
-article_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+article_ :: (ToProps props, ToChildren children) => props -> children -> Node
 article_ = mkElem "article"
 
-aside_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+aside_ :: (ToProps props, ToChildren children) => props -> children -> Node
 aside_ = mkElem "aside"
 
-audio_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+audio_ :: (ToProps props, ToChildren children) => props -> children -> Node
 audio_ = mkElem "audio"
 
-b_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+b_ :: (ToProps props, ToChildren children) => props -> children -> Node
 b_ = mkElem "b"
 
-base_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+base_ :: ToProps props => props -> Node
 base_ = mkEmptyElem "base"
 
-bdi_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+bdi_ :: (ToProps props, ToChildren children) => props -> children -> Node
 bdi_ = mkElem "bdi"
 
-bdo_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+bdo_ :: (ToProps props, ToChildren children) => props -> children -> Node
 bdo_ = mkElem "bdo"
 
-big_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+big_ :: (ToProps props, ToChildren children) => props -> children -> Node
 big_ = mkElem "big"
 
-blockquote_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+blockquote_ :: (ToProps props, ToChildren children) => props -> children -> Node
 blockquote_ = mkElem "blockquote"
 
-body_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+body_ :: (ToProps props, ToChildren children) => props -> children -> Node
 body_ = mkElem "body"
 
-br_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+br_ :: ToProps props => props -> Node
 br_ = mkEmptyElem "br"
 
-button_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+button_ :: (ToProps props, ToChildren children) => props -> children -> Node
 button_ = mkElem "button"
 
-canvas_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+canvas_ :: (ToProps props, ToChildren children) => props -> children -> Node
 canvas_ = mkElem "canvas"
 
-caption_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+caption_ :: (ToProps props, ToChildren children) => props -> children -> Node
 caption_ = mkElem "caption"
 
-circle_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+circle_ :: (ToProps props, ToChildren children) => props -> children -> Node
 circle_ = mkElem "circle"
 
-clipPath_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+clipPath_ :: (ToProps props, ToChildren children) => props -> children -> Node
 clipPath_ = mkElem "clipPath"
 
-code_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+code_ :: (ToProps props, ToChildren children) => props -> children -> Node
 code_ = mkElem "code"
 
-col_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+col_ :: ToProps props => props -> Node
 col_ = mkEmptyElem "col"
 
-colgroup_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+colgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
 colgroup_ = mkElem "colgroup"
 
-datalist_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+datalist_ :: (ToProps props, ToChildren children) => props -> children -> Node
 datalist_ = mkElem "datalist"
 
-dd_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+dd_ :: (ToProps props, ToChildren children) => props -> children -> Node
 dd_ = mkElem "dd"
 
-defs_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+defs_ :: (ToProps props, ToChildren children) => props -> children -> Node
 defs_ = mkElem "defs"
 
-del_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+del_ :: (ToProps props, ToChildren children) => props -> children -> Node
 del_ = mkElem "del"
 
-details_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+details_ :: (ToProps props, ToChildren children) => props -> children -> Node
 details_ = mkElem "details"
 
-dfn_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+dfn_ :: (ToProps props, ToChildren children) => props -> children -> Node
 dfn_ = mkElem "dfn"
 
-dialog_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+dialog_ :: (ToProps props, ToChildren children) => props -> children -> Node
 dialog_ = mkElem "dialog"
 
-div_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+div_ :: (ToProps props, ToChildren children) => props -> children -> Node
 div_ = mkElem "div"
 
-dl_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+dl_ :: (ToProps props, ToChildren children) => props -> children -> Node
 dl_ = mkElem "dl"
 
-dt_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+dt_ :: (ToProps props, ToChildren children) => props -> children -> Node
 dt_ = mkElem "dt"
 
-ellipse_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+ellipse_ :: (ToProps props, ToChildren children) => props -> children -> Node
 ellipse_ = mkElem "ellipse"
 
-em_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+em_ :: (ToProps props, ToChildren children) => props -> children -> Node
 em_ = mkElem "em"
 
-embed_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+embed_ :: ToProps props => props -> Node
 embed_ = mkEmptyElem "embed"
 
-fieldset_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+fieldset_ :: (ToProps props, ToChildren children) => props -> children -> Node
 fieldset_ = mkElem "fieldset"
 
-figcaption_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+figcaption_ :: (ToProps props, ToChildren children) => props -> children -> Node
 figcaption_ = mkElem "figcaption"
 
-figure_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+figure_ :: (ToProps props, ToChildren children) => props -> children -> Node
 figure_ = mkElem "figure"
 
-footer_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+footer_ :: (ToProps props, ToChildren children) => props -> children -> Node
 footer_ = mkElem "footer"
 
-g_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+g_ :: (ToProps props, ToChildren children) => props -> children -> Node
 g_ = mkElem "g"
 
-h1_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h1_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h1_ = mkElem "h1"
 
-h2_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h2_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h2_ = mkElem "h2"
 
-h3_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h3_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h3_ = mkElem "h3"
 
-h4_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h4_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h4_ = mkElem "h4"
 
-h5_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h5_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h5_ = mkElem "h5"
 
-h6_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+h6_ :: (ToProps props, ToChildren children) => props -> children -> Node
 h6_ = mkElem "h6"
 
-head_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+head_ :: (ToProps props, ToChildren children) => props -> children -> Node
 head_ = mkElem "head"
 
-header_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+header_ :: (ToProps props, ToChildren children) => props -> children -> Node
 header_ = mkElem "header"
 
-hgroup_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+hgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
 hgroup_ = mkElem "hgroup"
 
-hr_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+hr_ :: ToProps props => props -> Node
 hr_ = mkEmptyElem "hr"
 
-html_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+html_ :: (ToProps props, ToChildren children) => props -> children -> Node
 html_ = mkElem "html"
 
-i_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+i_ :: (ToProps props, ToChildren children) => props -> children -> Node
 i_ = mkElem "i"
 
-iframe_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+iframe_ :: (ToProps props, ToChildren children) => props -> children -> Node
 iframe_ = mkElem "iframe"
 
-image_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+image_ :: (ToProps props, ToChildren children) => props -> children -> Node
 image_ = mkElem "image"
 
-img_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+img_ :: ToProps props => props -> Node
 img_ = mkEmptyElem "img"
 
-input_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+input_ :: ToProps props => props -> Node
 input_ = mkEmptyElem "input"
 
-ins_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+ins_ :: (ToProps props, ToChildren children) => props -> children -> Node
 ins_ = mkElem "ins"
 
-kbd_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+kbd_ :: (ToProps props, ToChildren children) => props -> children -> Node
 kbd_ = mkElem "kbd"
 
-keygen_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+keygen_ :: ToProps props => props -> Node
 keygen_ = mkEmptyElem "keygen"
 
-legend_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+legend_ :: (ToProps props, ToChildren children) => props -> children -> Node
 legend_ = mkElem "legend"
 
-li_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+li_ :: (ToProps props, ToChildren children) => props -> children -> Node
 li_ = mkElem "li"
 
-line_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+line_ :: (ToProps props, ToChildren children) => props -> children -> Node
 line_ = mkElem "line"
 
-linearGradient_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+linearGradient_ :: (ToProps props, ToChildren children) => props -> children -> Node
 linearGradient_ = mkElem "linearGradient"
 
-link_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+link_ :: ToProps props => props -> Node
 link_ = mkEmptyElem "link"
 
-main_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+main_ :: (ToProps props, ToChildren children) => props -> children -> Node
 main_ = mkElem "main"
 
-map_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+map_ :: (ToProps props, ToChildren children) => props -> children -> Node
 map_ = mkElem "map"
 
-mark_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+mark_ :: (ToProps props, ToChildren children) => props -> children -> Node
 mark_ = mkElem "mark"
 
-menu_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+menu_ :: (ToProps props, ToChildren children) => props -> children -> Node
 menu_ = mkElem "menu"
 
-menuitem_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+menuitem_ :: ToProps props => props -> Node
 menuitem_ = mkEmptyElem "menuitem"
 
-meta_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+meta_ :: ToProps props => props -> Node
 meta_ = mkEmptyElem "meta"
 
-meter_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+meter_ :: (ToProps props, ToChildren children) => props -> children -> Node
 meter_ = mkElem "meter"
 
-nav_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+nav_ :: (ToProps props, ToChildren children) => props -> children -> Node
 nav_ = mkElem "nav"
 
-noscript_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+noscript_ :: (ToProps props, ToChildren children) => props -> children -> Node
 noscript_ = mkElem "noscript"
 
-object_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+object_ :: (ToProps props, ToChildren children) => props -> children -> Node
 object_ = mkElem "object"
 
-ol_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+ol_ :: (ToProps props, ToChildren children) => props -> children -> Node
 ol_ = mkElem "ol"
 
-optgroup_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+optgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
 optgroup_ = mkElem "optgroup"
 
-option_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+option_ :: (ToProps props, ToChildren children) => props -> children -> Node
 option_ = mkElem "option"
 
-output_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+output_ :: (ToProps props, ToChildren children) => props -> children -> Node
 output_ = mkElem "output"
 
-p_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+p_ :: (ToProps props, ToChildren children) => props -> children -> Node
 p_ = mkElem "p"
 
-param_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+param_ :: ToProps props => props -> Node
 param_ = mkEmptyElem "param"
 
-path_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+path_ :: (ToProps props, ToChildren children) => props -> children -> Node
 path_ = mkElem "path"
 
-picture_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+picture_ :: (ToProps props, ToChildren children) => props -> children -> Node
 picture_ = mkElem "picture"
 
-polygon_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+polygon_ :: (ToProps props, ToChildren children) => props -> children -> Node
 polygon_ = mkElem "polygon"
 
-polyline_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+polyline_ :: (ToProps props, ToChildren children) => props -> children -> Node
 polyline_ = mkElem "polyline"
 
-pre_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+pre_ :: (ToProps props, ToChildren children) => props -> children -> Node
 pre_ = mkElem "pre"
 
-progress_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+progress_ :: (ToProps props, ToChildren children) => props -> children -> Node
 progress_ = mkElem "progress"
 
-q_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+q_ :: (ToProps props, ToChildren children) => props -> children -> Node
 q_ = mkElem "q"
 
-radialGradient_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+radialGradient_ :: (ToProps props, ToChildren children) => props -> children -> Node
 radialGradient_ = mkElem "radialGradient"
 
-rect_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+rect_ :: (ToProps props, ToChildren children) => props -> children -> Node
 rect_ = mkElem "rect"
 
-rp_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+rp_ :: (ToProps props, ToChildren children) => props -> children -> Node
 rp_ = mkElem "rp"
 
-rt_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+rt_ :: (ToProps props, ToChildren children) => props -> children -> Node
 rt_ = mkElem "rt"
 
-ruby_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+ruby_ :: (ToProps props, ToChildren children) => props -> children -> Node
 ruby_ = mkElem "ruby"
 
-s_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+s_ :: (ToProps props, ToChildren children) => props -> children -> Node
 s_ = mkElem "s"
 
-samp_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+samp_ :: (ToProps props, ToChildren children) => props -> children -> Node
 samp_ = mkElem "samp"
 
-script_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+script_ :: (ToProps props, ToChildren children) => props -> children -> Node
 script_ = mkElem "script"
 
-section_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+section_ :: (ToProps props, ToChildren children) => props -> children -> Node
 section_ = mkElem "section"
 
-select_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+select_ :: (ToProps props, ToChildren children) => props -> children -> Node
 select_ = mkElem "select"
 
-small_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+small_ :: (ToProps props, ToChildren children) => props -> children -> Node
 small_ = mkElem "small"
 
-source_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+source_ :: ToProps props => props -> Node
 source_ = mkEmptyElem "source"
 
-stop_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+stop_ :: (ToProps props, ToChildren children) => props -> children -> Node
 stop_ = mkElem "stop"
 
-strong_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+strong_ :: (ToProps props, ToChildren children) => props -> children -> Node
 strong_ = mkElem "strong"
 
-sub_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+sub_ :: (ToProps props, ToChildren children) => props -> children -> Node
 sub_ = mkElem "sub"
 
-svg_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+svg_ :: (ToProps props, ToChildren children) => props -> children -> Node
 svg_ = mkElem "svg"
 
-table_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+table_ :: (ToProps props, ToChildren children) => props -> children -> Node
 table_ = mkElem "table"
 
-tbody_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+tbody_ :: (ToProps props, ToChildren children) => props -> children -> Node
 tbody_ = mkElem "tbody"
 
-td_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+td_ :: (ToProps props, ToChildren children) => props -> children -> Node
 td_ = mkElem "td"
 
-text_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+text_ :: (ToProps props, ToChildren children) => props -> children -> Node
 text_ = mkElem "text"
 
-textarea_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+textarea_ :: (ToProps props, ToChildren children) => props -> children -> Node
 textarea_ = mkElem "textarea"
 
-tfoot_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+tfoot_ :: (ToProps props, ToChildren children) => props -> children -> Node
 tfoot_ = mkElem "tfoot"
 
-th_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+th_ :: (ToProps props, ToChildren children) => props -> children -> Node
 th_ = mkElem "th"
 
-thead_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+thead_ :: (ToProps props, ToChildren children) => props -> children -> Node
 thead_ = mkElem "thead"
 
-time_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+time_ :: (ToProps props, ToChildren children) => props -> children -> Node
 time_ = mkElem "time"
 
-tr_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+tr_ :: (ToProps props, ToChildren children) => props -> children -> Node
 tr_ = mkElem "tr"
 
-track_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+track_ :: ToProps props => props -> Node
 track_ = mkEmptyElem "track"
 
-tspan_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+tspan_ :: (ToProps props, ToChildren children) => props -> children -> Node
 tspan_ = mkElem "tspan"
 
-u_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+u_ :: (ToProps props, ToChildren children) => props -> children -> Node
 u_ = mkElem "u"
 
-ul_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+ul_ :: (ToProps props, ToChildren children) => props -> children -> Node
 ul_ = mkElem "ul"
 
-var_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+var_ :: (ToProps props, ToChildren children) => props -> children -> Node
 var_ = mkElem "var"
 
-video_ :: (Applicative t, Foldable t, Foldable elems) => t Prop -> elems ReactNode -> ReactNode
+video_ :: (ToProps props, ToChildren children) => props -> children -> Node
 video_ = mkElem "video"
 
-wbr_ :: (Applicative t, Foldable t) => t Prop -> ReactNode
+wbr_ :: ToProps props => props -> Node
 wbr_ = mkEmptyElem "wbr"
 
 

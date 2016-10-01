@@ -1,34 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
 module React.Addons where
 
-import qualified Data.Foldable as F
 import Data.Maybe (catMaybes)
-import Data.JSString (JSString)
-import GHCJS.Types
-import React
+import GHCJS.Types (JSString, jsval)
 import React.DOM (className_)
+import React.Primitive (ToProps(toProps), ToPropsOf, ToChildren, Node, Class, Prop, PropName(PropName), (.:), createFactory, runFactory)
 
-foreign import javascript unsafe "React.addons.CSSTransitionGroup" js_cssTransitionGroup :: ReactClass OnlyAttributes
+foreign import javascript unsafe "React.addons.CSSTransitionGroup" js_cssTransitionGroup :: Class Prop
 
-cssTransition :: ReactProps OnlyAttributes -> Maybe (Array ReactNode) -> ReactNode
-cssTransition = runFactory' fact
+cssTransition :: (ToProps props, ToPropsOf props ~ Prop, ToChildren children) => props -> children -> Node
+cssTransition = runFactory fact
   where
     fact = createFactory js_cssTransitionGroup
 {-# NOINLINE cssTransition #-}
 
-cssTransitionGroup :: (Foldable elems) => JSString -> TransitionGroup -> elems ReactNode -> ReactNode
-cssTransitionGroup cl g es = cssTransition builtProps $ if Prelude.null es
-  then Nothing
-  else Just $ array $ F.toList es
+cssTransitionGroup :: ToChildren children => JSString -> TransitionGroup -> children -> Node
+cssTransitionGroup cl g = cssTransition props
   where
-    builtProps = buildProps $ catMaybes
+    props = catMaybes
       [ Just (className_ cl)
-      , Just (PropName "transitionName" .: (either jsval (jsval . buildProps . map (uncurry (\k v -> PropName k .: v))) $ transitionName g))
-      , (\x -> PropName "transitionEnterTimeout" .: x) <$> transitionEnterTimeout g
-      , (\x -> PropName "transitionLeaveTimeout" .: x) <$> transitionLeaveTimeout g
-      , (\x -> PropName "transitionEnter" .: x) <$> transitionEnter g
-      , (\x -> PropName "transitionLeave" .: x) <$> transitionLeave g
-      , (\x -> PropName "transitionAppear" .: x) <$> transitionAppear g
+      , Just (PropName "transitionName" .: (either jsval (jsval . toProps . map (uncurry (\k v -> PropName k .: v))) $ transitionName g))
+      , (PropName "transitionEnterTimeout" .:) <$> transitionEnterTimeout g
+      , (PropName "transitionLeaveTimeout" .:) <$> transitionLeaveTimeout g
+      , (PropName "transitionEnter" .:) <$> transitionEnter g
+      , (PropName "transitionLeave" .:) <$> transitionLeave g
+      , (PropName "transitionAppear" .:) <$> transitionAppear g
       ]
 
 data TransitionGroup = TransitionGroup
