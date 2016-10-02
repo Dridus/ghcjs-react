@@ -967,7 +967,7 @@ class ToProps a where
   -- 'ToPropsOf' @a@.
   toProps :: a -> Props (ToPropsOf a)
 
-instance ToProps (Props ps) where
+instance {-# OVERLAPPING #-} ToProps (Props ps) where
   type ToPropsOf (Props ps) = ps
   toProps = id
   {-# INLINE toProps #-}
@@ -977,7 +977,7 @@ instance ToProps OI.Object where
   toProps = Props
   {-# INLINE toProps #-}
 
-instance Foldable f => ToProps (f Prop) where
+instance {-# OVERLAPPABLE #-} Foldable f => ToProps (f Prop) where
   type ToPropsOf (f Prop) = Prop
   toProps = buildProps
 
@@ -994,11 +994,11 @@ class ToChildren a where
   -- |Convert to a @Maybe (Array Node)@ to hand off to React, with @Nothing@ indicating @null@.
   toChildren :: a -> Maybe (Array Node)
 
-instance ToChildren (Maybe (Array Node)) where
+instance {-# OVERLAPPING #-} ToChildren (Maybe (Array Node)) where
   toChildren = id
   {-# INLINE toChildren #-}
 
-instance (Foldable f, ToNode n) => ToChildren (f n) where
+instance {-# OVERLAPPABLE #-} (Foldable f, ToNode n) => ToChildren (f Node) where
   toChildren es
     | F.null es = Nothing
     | otherwise = Just . array . map node . F.toList $ es
