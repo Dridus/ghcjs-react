@@ -967,7 +967,7 @@ class ToProps a where
   -- 'ToPropsOf' @a@.
   toProps :: a -> Props (ToPropsOf a)
 
-instance {-# OVERLAPPING #-} ToProps (Props ps) where
+instance ToProps (Props ps) where
   type ToPropsOf (Props ps) = ps
   toProps = id
   {-# INLINE toProps #-}
@@ -977,8 +977,8 @@ instance ToProps OI.Object where
   toProps = Props
   {-# INLINE toProps #-}
 
-instance {-# OVERLAPPABLE #-} Foldable f => ToProps (f Prop) where
-  type ToPropsOf (f Prop) = Prop
+instance ToProps [Prop] where
+  type ToPropsOf [Prop] = Prop
   toProps = buildProps
 
 -- |Get the prop of this component by the given 'PropName' as a new 'Prop' to pass to some other component.
@@ -994,14 +994,14 @@ class ToChildren a where
   -- |Convert to a @Maybe (Array Node)@ to hand off to React, with @Nothing@ indicating @null@.
   toChildren :: a -> Maybe (Array Node)
 
-instance {-# OVERLAPPING #-} ToChildren (Maybe (Array Node)) where
+instance ToChildren (Maybe (Array Node)) where
   toChildren = id
   {-# INLINE toChildren #-}
 
-instance {-# OVERLAPPABLE #-} Foldable f => ToChildren (f Node) where
+instance ToChildren [Node] where
   toChildren es
     | F.null es = Nothing
-    | otherwise = Just . array . map node . F.toList $ es
+    | otherwise = Just . array . map node $ es
   {-# INLINE toChildren #-}
 
 -- |Class of types which can be converted to 'ReactNode's
