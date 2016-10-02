@@ -18,7 +18,7 @@ module React (
   , Factory(..), createFactory, runFactory
   -- * React Node and Elements
   , Node(..), createElement, cloneElement, isValidElement, (//)
-  , ToNode(node)
+  , ToNode(..), ToChildren(..)
   -- * React Component Instances
   , Instance(..), instanceThis, instanceElement
   , This(..)
@@ -27,7 +27,7 @@ module React (
   -- ** Prop Construction
   , PropName(..), suppressContentEditableWarning, dangerouslySetInnerHTML, key
   , Prop(..), (.:), noProps, inheritProp, inheritProp'
-  , GetProp(..)
+  , GetProp(..), ToProps(..)
   -- ** Event Props
   , EventProp, eventProp
   , SyntheticEvent(..)
