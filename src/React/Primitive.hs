@@ -998,7 +998,7 @@ instance {-# OVERLAPPING #-} ToChildren (Maybe (Array Node)) where
   toChildren = id
   {-# INLINE toChildren #-}
 
-instance {-# OVERLAPPABLE #-} (Foldable f, ToNode n) => ToChildren (f Node) where
+instance {-# OVERLAPPABLE #-} Foldable f => ToChildren (f Node) where
   toChildren es
     | F.null es = Nothing
     | otherwise = Just . array . map node . F.toList $ es
