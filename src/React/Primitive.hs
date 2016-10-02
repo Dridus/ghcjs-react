@@ -400,7 +400,7 @@ instance FromJSVal (State st) where
   fromJSVal = return . Just . coerce
 
 -- |Get the state of the React component.
-getState :: FromJSVal st => ReactM ps st (State st)
+getState :: ReactM ps st (State st)
 getState = liftIO . js_getState =<< ask
 
 foreign import javascript unsafe "$1['setState']($2)" js_setState :: This ps st -> JSVal -> IO ()
