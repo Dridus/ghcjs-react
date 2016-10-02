@@ -204,12 +204,12 @@ defaultDisplayName n s@(Spec { displayName }) =
   maybe (s { displayName = Just n }) (const s) displayName
 
 -- |Create a spec with no callbacks bound but for the mandatory 'render' callback and has no state.
-spec :: (ToJSVal ps, FromJSVal ps) => RendererM (ReactM ps OnlyAttributes Node) -> Spec ps OnlyAttributes
+spec :: RendererM (ReactM ps OnlyAttributes Node) -> Spec ps OnlyAttributes
 spec f = Spec f Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
 
 -- |Create a spec with some action to produce the initial state of components created using it along with the
 -- mandatory 'render' callback.
-statefulSpec :: (ToJSVal ps, FromJSVal ps, ToJSVal st, FromJSVal st) => ReactM ps st st -> RendererM (ReactM ps st Node) -> Spec ps st
+statefulSpec :: ReactM ps st st -> RendererM (ReactM ps st Node) -> Spec ps st
 statefulSpec st f = Spec f (Just st) Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
 
 -- |An action to clean up the callbacks bound during creation of a 'ReactSpec' from a 'Spec' by 'buildSpec'.
