@@ -1008,6 +1008,10 @@ instance (Foldable f, ToNode n) => ToChildren (f n) where
 class ToNode a where
   node :: a -> Node
 
+instance ToNode Node where
+  node = id
+  {-# INLINE node #-}
+
 instance ToNode S.Text where
   node = text . textToJSString
   {-# INLINE node #-}
