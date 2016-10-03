@@ -12,23 +12,23 @@ import JavaScript.Object (Object)
 import GHCJS.Foreign
 import GHCJS.Marshal.Pure
 import GHCJS.Types
-import React.Primitive
+import React
 
 foreign import javascript "React['DOM'][$1].apply(this, [$2].concat($3))" js_elem :: JSString -> Props ps -> JSVal -> Node
 
-mkElem :: (ToProps props, ToChildren children) => JSString -> props -> children -> Node
-mkElem str ps = js_elem str (toProps ps) . asChildrenJSVal
+mkElem :: ToChildren children => JSString -> Props ps -> children -> Node
+mkElem str ps = js_elem str ps . asChildrenJSVal
 
-mkEmptyElem :: ToProps props => JSString -> props -> Node
-mkEmptyElem str ps = js_elem str (toProps ps) jsUndefined
+mkEmptyElem :: JSString -> Props ps -> Node
+mkEmptyElem str ps = js_elem str ps jsUndefined
 
 class ElementOrProp f t where
   symbolName :: JSString -> (f, Proxy t)
 
-instance (ToProps props, ToChildren children) => ElementOrProp (props -> children -> Node) a where
+instance ToChildren children => ElementOrProp (Props ps -> children -> Node) a where
   symbolName n = (mkElem n, Proxy)
 
-instance ToProps props => ElementOrProp (props -> Node) a where
+instance ElementOrProp (Props ps -> Node) a where
   symbolName n = (mkEmptyElem n, Proxy)
 
 instance ElementOrProp (PropName t) t where
@@ -45,367 +45,367 @@ instance IsProp (PropName t) t where
 instance PToJSVal t => IsProp (t -> Prop) t where
   mkProp str = (.:) (PropName str :: PropName t)
 
-a_ :: (ToProps props, ToChildren children) => props -> children -> Node
+a_ :: ToChildren children => Props ps -> children -> Node
 a_ = mkElem "a"
 
-abbr_ :: (ToProps props, ToChildren children) => props -> children -> Node
+abbr_ :: ToChildren children => Props ps -> children -> Node
 abbr_ = mkElem "abbr"
 
-address_ :: (ToProps props, ToChildren children) => props -> children -> Node
+address_ :: ToChildren children => Props ps -> children -> Node
 address_ = mkElem "address"
 
-area_ :: ToProps props => props -> Node
+area_ :: Props ps -> Node
 area_ = mkEmptyElem "area"
 
-article_ :: (ToProps props, ToChildren children) => props -> children -> Node
+article_ :: ToChildren children => Props ps -> children -> Node
 article_ = mkElem "article"
 
-aside_ :: (ToProps props, ToChildren children) => props -> children -> Node
+aside_ :: ToChildren children => Props ps -> children -> Node
 aside_ = mkElem "aside"
 
-audio_ :: (ToProps props, ToChildren children) => props -> children -> Node
+audio_ :: ToChildren children => Props ps -> children -> Node
 audio_ = mkElem "audio"
 
-b_ :: (ToProps props, ToChildren children) => props -> children -> Node
+b_ :: ToChildren children => Props ps -> children -> Node
 b_ = mkElem "b"
 
-base_ :: ToProps props => props -> Node
+base_ :: Props ps -> Node
 base_ = mkEmptyElem "base"
 
-bdi_ :: (ToProps props, ToChildren children) => props -> children -> Node
+bdi_ :: ToChildren children => Props ps -> children -> Node
 bdi_ = mkElem "bdi"
 
-bdo_ :: (ToProps props, ToChildren children) => props -> children -> Node
+bdo_ :: ToChildren children => Props ps -> children -> Node
 bdo_ = mkElem "bdo"
 
-big_ :: (ToProps props, ToChildren children) => props -> children -> Node
+big_ :: ToChildren children => Props ps -> children -> Node
 big_ = mkElem "big"
 
-blockquote_ :: (ToProps props, ToChildren children) => props -> children -> Node
+blockquote_ :: ToChildren children => Props ps -> children -> Node
 blockquote_ = mkElem "blockquote"
 
-body_ :: (ToProps props, ToChildren children) => props -> children -> Node
+body_ :: ToChildren children => Props ps -> children -> Node
 body_ = mkElem "body"
 
-br_ :: ToProps props => props -> Node
+br_ :: Props ps -> Node
 br_ = mkEmptyElem "br"
 
-button_ :: (ToProps props, ToChildren children) => props -> children -> Node
+button_ :: ToChildren children => Props ps -> children -> Node
 button_ = mkElem "button"
 
-canvas_ :: (ToProps props, ToChildren children) => props -> children -> Node
+canvas_ :: ToChildren children => Props ps -> children -> Node
 canvas_ = mkElem "canvas"
 
-caption_ :: (ToProps props, ToChildren children) => props -> children -> Node
+caption_ :: ToChildren children => Props ps -> children -> Node
 caption_ = mkElem "caption"
 
-circle_ :: (ToProps props, ToChildren children) => props -> children -> Node
+circle_ :: ToChildren children => Props ps -> children -> Node
 circle_ = mkElem "circle"
 
-clipPath_ :: (ToProps props, ToChildren children) => props -> children -> Node
+clipPath_ :: ToChildren children => Props ps -> children -> Node
 clipPath_ = mkElem "clipPath"
 
-code_ :: (ToProps props, ToChildren children) => props -> children -> Node
+code_ :: ToChildren children => Props ps -> children -> Node
 code_ = mkElem "code"
 
-col_ :: ToProps props => props -> Node
+col_ :: Props ps -> Node
 col_ = mkEmptyElem "col"
 
-colgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
+colgroup_ :: ToChildren children => Props ps -> children -> Node
 colgroup_ = mkElem "colgroup"
 
-datalist_ :: (ToProps props, ToChildren children) => props -> children -> Node
+datalist_ :: ToChildren children => Props ps -> children -> Node
 datalist_ = mkElem "datalist"
 
-dd_ :: (ToProps props, ToChildren children) => props -> children -> Node
+dd_ :: ToChildren children => Props ps -> children -> Node
 dd_ = mkElem "dd"
 
-defs_ :: (ToProps props, ToChildren children) => props -> children -> Node
+defs_ :: ToChildren children => Props ps -> children -> Node
 defs_ = mkElem "defs"
 
-del_ :: (ToProps props, ToChildren children) => props -> children -> Node
+del_ :: ToChildren children => Props ps -> children -> Node
 del_ = mkElem "del"
 
-details_ :: (ToProps props, ToChildren children) => props -> children -> Node
+details_ :: ToChildren children => Props ps -> children -> Node
 details_ = mkElem "details"
 
-dfn_ :: (ToProps props, ToChildren children) => props -> children -> Node
+dfn_ :: ToChildren children => Props ps -> children -> Node
 dfn_ = mkElem "dfn"
 
-dialog_ :: (ToProps props, ToChildren children) => props -> children -> Node
+dialog_ :: ToChildren children => Props ps -> children -> Node
 dialog_ = mkElem "dialog"
 
-div_ :: (ToProps props, ToChildren children) => props -> children -> Node
+div_ :: ToChildren children => Props ps -> children -> Node
 div_ = mkElem "div"
 
-dl_ :: (ToProps props, ToChildren children) => props -> children -> Node
+dl_ :: ToChildren children => Props ps -> children -> Node
 dl_ = mkElem "dl"
 
-dt_ :: (ToProps props, ToChildren children) => props -> children -> Node
+dt_ :: ToChildren children => Props ps -> children -> Node
 dt_ = mkElem "dt"
 
-ellipse_ :: (ToProps props, ToChildren children) => props -> children -> Node
+ellipse_ :: ToChildren children => Props ps -> children -> Node
 ellipse_ = mkElem "ellipse"
 
-em_ :: (ToProps props, ToChildren children) => props -> children -> Node
+em_ :: ToChildren children => Props ps -> children -> Node
 em_ = mkElem "em"
 
-embed_ :: ToProps props => props -> Node
+embed_ :: Props ps -> Node
 embed_ = mkEmptyElem "embed"
 
-fieldset_ :: (ToProps props, ToChildren children) => props -> children -> Node
+fieldset_ :: ToChildren children => Props ps -> children -> Node
 fieldset_ = mkElem "fieldset"
 
-figcaption_ :: (ToProps props, ToChildren children) => props -> children -> Node
+figcaption_ :: ToChildren children => Props ps -> children -> Node
 figcaption_ = mkElem "figcaption"
 
-figure_ :: (ToProps props, ToChildren children) => props -> children -> Node
+figure_ :: ToChildren children => Props ps -> children -> Node
 figure_ = mkElem "figure"
 
-footer_ :: (ToProps props, ToChildren children) => props -> children -> Node
+footer_ :: ToChildren children => Props ps -> children -> Node
 footer_ = mkElem "footer"
 
-g_ :: (ToProps props, ToChildren children) => props -> children -> Node
+g_ :: ToChildren children => Props ps -> children -> Node
 g_ = mkElem "g"
 
-h1_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h1_ :: ToChildren children => Props ps -> children -> Node
 h1_ = mkElem "h1"
 
-h2_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h2_ :: ToChildren children => Props ps -> children -> Node
 h2_ = mkElem "h2"
 
-h3_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h3_ :: ToChildren children => Props ps -> children -> Node
 h3_ = mkElem "h3"
 
-h4_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h4_ :: ToChildren children => Props ps -> children -> Node
 h4_ = mkElem "h4"
 
-h5_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h5_ :: ToChildren children => Props ps -> children -> Node
 h5_ = mkElem "h5"
 
-h6_ :: (ToProps props, ToChildren children) => props -> children -> Node
+h6_ :: ToChildren children => Props ps -> children -> Node
 h6_ = mkElem "h6"
 
-head_ :: (ToProps props, ToChildren children) => props -> children -> Node
+head_ :: ToChildren children => Props ps -> children -> Node
 head_ = mkElem "head"
 
-header_ :: (ToProps props, ToChildren children) => props -> children -> Node
+header_ :: ToChildren children => Props ps -> children -> Node
 header_ = mkElem "header"
 
-hgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
+hgroup_ :: ToChildren children => Props ps -> children -> Node
 hgroup_ = mkElem "hgroup"
 
-hr_ :: ToProps props => props -> Node
+hr_ :: Props ps -> Node
 hr_ = mkEmptyElem "hr"
 
-html_ :: (ToProps props, ToChildren children) => props -> children -> Node
+html_ :: ToChildren children => Props ps -> children -> Node
 html_ = mkElem "html"
 
-i_ :: (ToProps props, ToChildren children) => props -> children -> Node
+i_ :: ToChildren children => Props ps -> children -> Node
 i_ = mkElem "i"
 
-iframe_ :: (ToProps props, ToChildren children) => props -> children -> Node
+iframe_ :: ToChildren children => Props ps -> children -> Node
 iframe_ = mkElem "iframe"
 
-image_ :: (ToProps props, ToChildren children) => props -> children -> Node
+image_ :: ToChildren children => Props ps -> children -> Node
 image_ = mkElem "image"
 
-img_ :: ToProps props => props -> Node
+img_ :: Props ps -> Node
 img_ = mkEmptyElem "img"
 
-input_ :: ToProps props => props -> Node
+input_ :: Props ps -> Node
 input_ = mkEmptyElem "input"
 
-ins_ :: (ToProps props, ToChildren children) => props -> children -> Node
+ins_ :: ToChildren children => Props ps -> children -> Node
 ins_ = mkElem "ins"
 
-kbd_ :: (ToProps props, ToChildren children) => props -> children -> Node
+kbd_ :: ToChildren children => Props ps -> children -> Node
 kbd_ = mkElem "kbd"
 
-keygen_ :: ToProps props => props -> Node
+keygen_ :: Props ps -> Node
 keygen_ = mkEmptyElem "keygen"
 
-legend_ :: (ToProps props, ToChildren children) => props -> children -> Node
+legend_ :: ToChildren children => Props ps -> children -> Node
 legend_ = mkElem "legend"
 
-li_ :: (ToProps props, ToChildren children) => props -> children -> Node
+li_ :: ToChildren children => Props ps -> children -> Node
 li_ = mkElem "li"
 
-line_ :: (ToProps props, ToChildren children) => props -> children -> Node
+line_ :: ToChildren children => Props ps -> children -> Node
 line_ = mkElem "line"
 
-linearGradient_ :: (ToProps props, ToChildren children) => props -> children -> Node
+linearGradient_ :: ToChildren children => Props ps -> children -> Node
 linearGradient_ = mkElem "linearGradient"
 
-link_ :: ToProps props => props -> Node
+link_ :: Props ps -> Node
 link_ = mkEmptyElem "link"
 
-main_ :: (ToProps props, ToChildren children) => props -> children -> Node
+main_ :: ToChildren children => Props ps -> children -> Node
 main_ = mkElem "main"
 
-map_ :: (ToProps props, ToChildren children) => props -> children -> Node
+map_ :: ToChildren children => Props ps -> children -> Node
 map_ = mkElem "map"
 
-mark_ :: (ToProps props, ToChildren children) => props -> children -> Node
+mark_ :: ToChildren children => Props ps -> children -> Node
 mark_ = mkElem "mark"
 
-menu_ :: (ToProps props, ToChildren children) => props -> children -> Node
+menu_ :: ToChildren children => Props ps -> children -> Node
 menu_ = mkElem "menu"
 
-menuitem_ :: ToProps props => props -> Node
+menuitem_ :: Props ps -> Node
 menuitem_ = mkEmptyElem "menuitem"
 
-meta_ :: ToProps props => props -> Node
+meta_ :: Props ps -> Node
 meta_ = mkEmptyElem "meta"
 
-meter_ :: (ToProps props, ToChildren children) => props -> children -> Node
+meter_ :: ToChildren children => Props ps -> children -> Node
 meter_ = mkElem "meter"
 
-nav_ :: (ToProps props, ToChildren children) => props -> children -> Node
+nav_ :: ToChildren children => Props ps -> children -> Node
 nav_ = mkElem "nav"
 
-noscript_ :: (ToProps props, ToChildren children) => props -> children -> Node
+noscript_ :: ToChildren children => Props ps -> children -> Node
 noscript_ = mkElem "noscript"
 
-object_ :: (ToProps props, ToChildren children) => props -> children -> Node
+object_ :: ToChildren children => Props ps -> children -> Node
 object_ = mkElem "object"
 
-ol_ :: (ToProps props, ToChildren children) => props -> children -> Node
+ol_ :: ToChildren children => Props ps -> children -> Node
 ol_ = mkElem "ol"
 
-optgroup_ :: (ToProps props, ToChildren children) => props -> children -> Node
+optgroup_ :: ToChildren children => Props ps -> children -> Node
 optgroup_ = mkElem "optgroup"
 
-option_ :: (ToProps props, ToChildren children) => props -> children -> Node
+option_ :: ToChildren children => Props ps -> children -> Node
 option_ = mkElem "option"
 
-output_ :: (ToProps props, ToChildren children) => props -> children -> Node
+output_ :: ToChildren children => Props ps -> children -> Node
 output_ = mkElem "output"
 
-p_ :: (ToProps props, ToChildren children) => props -> children -> Node
+p_ :: ToChildren children => Props ps -> children -> Node
 p_ = mkElem "p"
 
-param_ :: ToProps props => props -> Node
+param_ :: Props ps -> Node
 param_ = mkEmptyElem "param"
 
-path_ :: (ToProps props, ToChildren children) => props -> children -> Node
+path_ :: ToChildren children => Props ps -> children -> Node
 path_ = mkElem "path"
 
-picture_ :: (ToProps props, ToChildren children) => props -> children -> Node
+picture_ :: ToChildren children => Props ps -> children -> Node
 picture_ = mkElem "picture"
 
-polygon_ :: (ToProps props, ToChildren children) => props -> children -> Node
+polygon_ :: ToChildren children => Props ps -> children -> Node
 polygon_ = mkElem "polygon"
 
-polyline_ :: (ToProps props, ToChildren children) => props -> children -> Node
+polyline_ :: ToChildren children => Props ps -> children -> Node
 polyline_ = mkElem "polyline"
 
-pre_ :: (ToProps props, ToChildren children) => props -> children -> Node
+pre_ :: ToChildren children => Props ps -> children -> Node
 pre_ = mkElem "pre"
 
-progress_ :: (ToProps props, ToChildren children) => props -> children -> Node
+progress_ :: ToChildren children => Props ps -> children -> Node
 progress_ = mkElem "progress"
 
-q_ :: (ToProps props, ToChildren children) => props -> children -> Node
+q_ :: ToChildren children => Props ps -> children -> Node
 q_ = mkElem "q"
 
-radialGradient_ :: (ToProps props, ToChildren children) => props -> children -> Node
+radialGradient_ :: ToChildren children => Props ps -> children -> Node
 radialGradient_ = mkElem "radialGradient"
 
-rect_ :: (ToProps props, ToChildren children) => props -> children -> Node
+rect_ :: ToChildren children => Props ps -> children -> Node
 rect_ = mkElem "rect"
 
-rp_ :: (ToProps props, ToChildren children) => props -> children -> Node
+rp_ :: ToChildren children => Props ps -> children -> Node
 rp_ = mkElem "rp"
 
-rt_ :: (ToProps props, ToChildren children) => props -> children -> Node
+rt_ :: ToChildren children => Props ps -> children -> Node
 rt_ = mkElem "rt"
 
-ruby_ :: (ToProps props, ToChildren children) => props -> children -> Node
+ruby_ :: ToChildren children => Props ps -> children -> Node
 ruby_ = mkElem "ruby"
 
-s_ :: (ToProps props, ToChildren children) => props -> children -> Node
+s_ :: ToChildren children => Props ps -> children -> Node
 s_ = mkElem "s"
 
-samp_ :: (ToProps props, ToChildren children) => props -> children -> Node
+samp_ :: ToChildren children => Props ps -> children -> Node
 samp_ = mkElem "samp"
 
-script_ :: (ToProps props, ToChildren children) => props -> children -> Node
+script_ :: ToChildren children => Props ps -> children -> Node
 script_ = mkElem "script"
 
-section_ :: (ToProps props, ToChildren children) => props -> children -> Node
+section_ :: ToChildren children => Props ps -> children -> Node
 section_ = mkElem "section"
 
-select_ :: (ToProps props, ToChildren children) => props -> children -> Node
+select_ :: ToChildren children => Props ps -> children -> Node
 select_ = mkElem "select"
 
-small_ :: (ToProps props, ToChildren children) => props -> children -> Node
+small_ :: ToChildren children => Props ps -> children -> Node
 small_ = mkElem "small"
 
-source_ :: ToProps props => props -> Node
+source_ :: Props ps -> Node
 source_ = mkEmptyElem "source"
 
-stop_ :: (ToProps props, ToChildren children) => props -> children -> Node
+stop_ :: ToChildren children => Props ps -> children -> Node
 stop_ = mkElem "stop"
 
-strong_ :: (ToProps props, ToChildren children) => props -> children -> Node
+strong_ :: ToChildren children => Props ps -> children -> Node
 strong_ = mkElem "strong"
 
-sub_ :: (ToProps props, ToChildren children) => props -> children -> Node
+sub_ :: ToChildren children => Props ps -> children -> Node
 sub_ = mkElem "sub"
 
-svg_ :: (ToProps props, ToChildren children) => props -> children -> Node
+svg_ :: ToChildren children => Props ps -> children -> Node
 svg_ = mkElem "svg"
 
-table_ :: (ToProps props, ToChildren children) => props -> children -> Node
+table_ :: ToChildren children => Props ps -> children -> Node
 table_ = mkElem "table"
 
-tbody_ :: (ToProps props, ToChildren children) => props -> children -> Node
+tbody_ :: ToChildren children => Props ps -> children -> Node
 tbody_ = mkElem "tbody"
 
-td_ :: (ToProps props, ToChildren children) => props -> children -> Node
+td_ :: ToChildren children => Props ps -> children -> Node
 td_ = mkElem "td"
 
-text_ :: (ToProps props, ToChildren children) => props -> children -> Node
+text_ :: ToChildren children => Props ps -> children -> Node
 text_ = mkElem "text"
 
-textarea_ :: (ToProps props, ToChildren children) => props -> children -> Node
+textarea_ :: ToChildren children => Props ps -> children -> Node
 textarea_ = mkElem "textarea"
 
-tfoot_ :: (ToProps props, ToChildren children) => props -> children -> Node
+tfoot_ :: ToChildren children => Props ps -> children -> Node
 tfoot_ = mkElem "tfoot"
 
-th_ :: (ToProps props, ToChildren children) => props -> children -> Node
+th_ :: ToChildren children => Props ps -> children -> Node
 th_ = mkElem "th"
 
-thead_ :: (ToProps props, ToChildren children) => props -> children -> Node
+thead_ :: ToChildren children => Props ps -> children -> Node
 thead_ = mkElem "thead"
 
-time_ :: (ToProps props, ToChildren children) => props -> children -> Node
+time_ :: ToChildren children => Props ps -> children -> Node
 time_ = mkElem "time"
 
-tr_ :: (ToProps props, ToChildren children) => props -> children -> Node
+tr_ :: ToChildren children => Props ps -> children -> Node
 tr_ = mkElem "tr"
 
-track_ :: ToProps props => props -> Node
+track_ :: Props ps -> Node
 track_ = mkEmptyElem "track"
 
-tspan_ :: (ToProps props, ToChildren children) => props -> children -> Node
+tspan_ :: ToChildren children => Props ps -> children -> Node
 tspan_ = mkElem "tspan"
 
-u_ :: (ToProps props, ToChildren children) => props -> children -> Node
+u_ :: ToChildren children => Props ps -> children -> Node
 u_ = mkElem "u"
 
-ul_ :: (ToProps props, ToChildren children) => props -> children -> Node
+ul_ :: ToChildren children => Props ps -> children -> Node
 ul_ = mkElem "ul"
 
-var_ :: (ToProps props, ToChildren children) => props -> children -> Node
+var_ :: ToChildren children => Props ps -> children -> Node
 var_ = mkElem "var"
 
-video_ :: (ToProps props, ToChildren children) => props -> children -> Node
+video_ :: ToChildren children => Props ps -> children -> Node
 video_ = mkElem "video"
 
-wbr_ :: ToProps props => props -> Node
+wbr_ :: Props ps -> Node
 wbr_ = mkEmptyElem "wbr"
 
 

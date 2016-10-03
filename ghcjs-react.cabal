@@ -43,8 +43,7 @@ library
   ghc-options:         -Wall -Werror
   exposed-modules:     React,
                        React.DOM,
-                       React.DOM.Utils,
-                       React.Primitive
+                       React.DOM.Utils
   if flag(addons)
      exposed-modules:  React.Addons
   default-extensions:  RankNTypes

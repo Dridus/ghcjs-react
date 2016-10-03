@@ -5,11 +5,11 @@ module React.Addons where
 import Data.Maybe (catMaybes)
 import GHCJS.Types (JSString, jsval)
 import React.DOM (className_)
-import React.Primitive (ToProps(toProps), ToPropsOf, ToChildren, Node, Class, Prop, PropName(PropName), (.:), createFactory, runFactory)
+import React (ToChildren, Node, Class, Props, Prop, PropName(PropName), (.:), toProps, createFactory, runFactory)
 
 foreign import javascript unsafe "React.addons.CSSTransitionGroup" js_cssTransitionGroup :: Class Prop
 
-cssTransition :: (ToProps props, ToPropsOf props ~ Prop, ToChildren children) => props -> children -> Node
+cssTransition :: ToChildren children => Props Prop -> children -> Node
 cssTransition = runFactory fact
   where
     fact = createFactory js_cssTransitionGroup
@@ -18,7 +18,7 @@ cssTransition = runFactory fact
 cssTransitionGroup :: ToChildren children => JSString -> TransitionGroup -> children -> Node
 cssTransitionGroup cl g = cssTransition props
   where
-    props = catMaybes
+    props = toProps $ catMaybes
       [ Just (className_ cl)
       , Just (PropName "transitionName" .: (either jsval (jsval . toProps . map (uncurry (\k v -> PropName k .: v))) $ transitionName g))
       , (PropName "transitionEnterTimeout" .:) <$> transitionEnterTimeout g
