@@ -22,11 +22,11 @@ module React.Primitive (
   , Instance(..), instanceThis, instanceElement
   , This(..), captureThis
   -- * Component Props and Properties
-  , Props(..), getProps
-  , GetProp(..)
+  , Props(..), getProps, getProp
+  , ReadProp(..)
   , ToProps(..)
   -- ** Prop Construction
-  , PropName(..), suppressContentEditableWarning, dangerouslySetInnerHTML, key
+  , PropName(..), suppressContentEditableWarning, dangerouslySetInnerHTML, key, children
   , Prop(..), (.:), buildProps, props, unsafeProps, noProps, inheritProp, inheritProp'
   -- ** Event Props
   , EventProp, eventProp
@@ -66,7 +66,7 @@ module React.Primitive (
   -- * Component State
   , State(..), getState, setState, replaceState, setState'
   -- * ReactM and RendererM
-  , ReactM(..), runReactM
+  , ReactM(..), runReactM, getChildren
   , RendererM(..)
   -- * Event handlers and callbacks
   , EventHandler, eventHandler, jsEventHandler, callback
@@ -388,6 +388,14 @@ getProps = do
   v <- ask
   liftIO $ js_getProps v
 
+-- |Fetch a single property from the current component instance's props
+getProp :: FromJSVal a => PropName a -> ReactM ps st (Maybe a)
+getProp pn = readProp pn <$> getProps
+
+-- |Get the children of a component.
+getChildren :: ReactM ps st (Maybe Node)
+getChildren = getProp children
+
 foreign import javascript unsafe "$1['state']" js_getState :: This ps st -> IO (State st)
 
 -- |A state object with a phantom type to distinguish state values for different components.
@@ -494,6 +502,10 @@ dangerouslySetInnerHTML = PropName "dangerouslySetInnerHTML"
 -- See https://facebook.github.io/react/docs/reconciliation.html#keys
 key :: PropName JSString
 key = PropName "key"
+
+-- |Prop for getting children of a component.
+children :: PropName Node
+children = PropName "children"
 
 -- TODO support callback version of ref?
 
@@ -918,40 +930,40 @@ unsafeGetRef str = do
     then Just $ Instance r
     else Nothing
 
-foreign import javascript unsafe "($1 ? $1.props[$2] : null)" js_getProp :: This ps st -> JSString -> IO JSVal
+foreign import javascript unsafe "($1 ? $1.props[$2] : null)" js_readProp :: This ps st -> JSString -> IO JSVal
 foreign import javascript unsafe "$1[$2]" js_deref :: Props ps -> JSString -> IO JSVal
 
 -- |Unform interface for getting a prop by some name from something which contains or represents props,
 -- specifically 'This', 'ReactProps', or 'Properties'.
-class GetProp a where
+class ReadProp a where
   -- |Get the property of the given name from a property carrier @a@, using the 'FromJSVal' instance to
   -- convert the property value into a Haskell type if it's present.
-  getProp :: FromJSVal p => a -> PropName p -> Maybe p
+  readProp :: FromJSVal p => PropName p -> a -> Maybe p
 
   -- |Get the property of the given name and force it to be of the desired type using 'unsafeCoerce'
-  unsafeGetProp :: a -> PropName p -> Maybe p
+  unsafeReadProp :: PropName p -> a -> Maybe p
 
-instance GetProp (This ps st) where
-  getProp this (PropName pn) = unsafePerformIO $ do
-    p <- js_getProp this pn
+instance ReadProp (This ps st) where
+  readProp (PropName pn) this = unsafePerformIO $ do
+    p <- js_readProp this pn
     if isTruthy p
       then fromJSVal p
       else return Nothing
 
-  unsafeGetProp this (PropName pn) = unsafePerformIO $ do
-    p <- js_getProp this pn
+  unsafeReadProp (PropName pn) this = unsafePerformIO $ do
+    p <- js_readProp this pn
     return $ if isTruthy p
       then Just $ unsafeCoerce p
       else Nothing
 
-instance GetProp (Props a) where
-  getProp allProps (PropName pn) = unsafePerformIO $ do
+instance ReadProp (Props a) where
+  readProp (PropName pn) allProps = unsafePerformIO $ do
     p <- js_deref allProps pn
     if isTruthy p
       then fromJSVal p
       else return Nothing
 
-  unsafeGetProp allProps (PropName pn) = unsafePerformIO $ do
+  unsafeReadProp (PropName pn) allProps = unsafePerformIO $ do
     p <- js_deref allProps pn
     return $ if isTruthy p
       then Just $ unsafeCoerce p
@@ -982,12 +994,12 @@ instance ToProps [Prop] where
   toProps = buildProps
 
 -- |Get the prop of this component by the given 'PropName' as a new 'Prop' to pass to some other component.
-inheritProp :: This ps st -> PropName p -> Prop
-inheritProp this (PropName p) = inheritProp' this p
+inheritProp :: PropName p -> This ps st -> Prop
+inheritProp (PropName p) = inheritProp' p
 
 -- |Get the prop of this component by the given 'JSString' as a new 'Prop' to pass to some other component.
-inheritProp' :: This ps st -> JSString -> Prop
-inheritProp' this str = Prop str . fromMaybe jsNull $ getProp this (PropName str)
+inheritProp' :: JSString -> This ps st -> Prop
+inheritProp' str = Prop str . fromMaybe jsNull . readProp (PropName str)
 
 -- |Class of types which can be converted to a sequence of children for a React node.
 class ToChildren a where

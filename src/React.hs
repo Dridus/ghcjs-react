@@ -23,11 +23,11 @@ module React (
   , Instance(..), instanceThis, instanceElement
   , This(..)
   -- * Component Props and Properties
-  , Properties(..), getProperties, readProperties
+  , Properties(..), getProperties, readProperties, getProp
   -- ** Prop Construction
-  , PropName(..), suppressContentEditableWarning, dangerouslySetInnerHTML, key
+  , PropName(..), suppressContentEditableWarning, dangerouslySetInnerHTML, key, children
   , Prop(..), (.:), noProps, inheritProp, inheritProp'
-  , GetProp(..), ToProps(..)
+  , ReadProp(..), ToProps(..)
   -- ** Event Props
   , EventProp, eventProp
   , SyntheticEvent(..)
@@ -66,7 +66,7 @@ module React (
   -- * Component State
   , getState, readState, replaceState, modifyState
   -- * ReactM and RendererM
-  , ReactM(..), runReactM
+  , ReactM(..), runReactM, getChildren
   , RendererM(..)
   -- * Event handlers and callbacks
   , EventHandler, eventHandler, jsEventHandler, callback
@@ -75,7 +75,6 @@ module React (
   -- * Miscellaneous
   , SanitizedHtml(..)
   , OnlyAttributes(..)
-  , children
   , Array(..), array
   , maybeSetProp
   , printWhatever
@@ -101,10 +100,6 @@ import React.Primitive hiding (Props, Spec, State, getProps, getState, replaceSt
 import qualified React.Primitive as Prim
 import System.IO.Unsafe
 import Unsafe.Coerce
-
--- |Fetch the @children@ property of a props object.
-children :: GetProp p => p -> Maybe Node
-children = flip getProp (PropName "children")
 
 -- |Get the props of this React component in some Haskell type @ps@ by using its 'FromJSVal' instance to
 -- recover it from the props.
@@ -400,7 +395,7 @@ makeClass nameStr specExp = do
     noInlineFun = PragmaD $ InlineP nameName NoInline FunLike AllPhases
     expr = [e| createClass . fst . unsafePerformIO . buildSpec . defaultDisplayName $(THSyntax.lift nameStr) $ $specExp |]
 
-instance GetProp (Properties a) where
-  getProp (Properties _ allProps) = getProp allProps
-  unsafeGetProp (Properties _ allProps) = unsafeGetProp allProps
+instance ReadProp (Properties a) where
+  readProp name = readProp name . allProps
+  unsafeReadProp name = unsafeReadProp name . allProps
 
